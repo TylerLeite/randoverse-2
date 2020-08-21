@@ -1,0 +1,69 @@
+terrain generation:
+  better normals
+  use simplexnoise instead of perlin noise
+  create terrain in c++
+  create 3d texture on gpu
+  biomes
+  territories
+
+  chunk class
+    -contains 32^3 array of corner densities (constant since creation) (yes that means chunks are 31*31)
+    -lakes occur at sea level
+    -cellular automata for heightmapping across chunks (mountains and oceans, etc)
+    -also cellular automata maps for structures, mob territory
+    -biomes governedby a meta-chunk (cellular automata, each pixel is a chunk), as a ratio between all possible biome types
+    -generates 64^2 chunks at a time. matches up edges with previously generated metachunks
+    -or expands the biome chunkydo without building out each chunk in it. then just reference it when its time to make a chunk
+    -each biome has its own density function. they are composed with weights based on the above ratios
+
+randorune to font
+
+random subspecies
+  predefined species to play as (orc, troll, centaur, etc)
+  procedural variations on those species
+
+procedural culture based on species stats, world location
+  -> individuals have their species culture as well as the culture of where they grow up
+
+improved lang-gen based on cultures (including language-mixing)
+
+factories for procedurally generated
+  spells
+  items
+
+procedural personalities / dispositions based on an individual's fuzzy view of the world state
+
+procedural quest / story generation
+  connected fractal structure
+    single start node has many branches
+    branches can loop back + merge
+    main line leads to some conclusion of an arc, branches are related but dont necessarily lead to the story's completion
+    world state exists on several levels of abstraction -> because world is generated fuzzily at first, with details added in later
+
+  actors in the world have desires based on dispositions. e.g. wolf hunts sheep, shepherd likes sheep -> shepherd desires to fight off wolves. but how can abstract desires that fill these concrete dispositions be found? and how can those abstract desires be utilized to create a concrete quest?
+
+  given a world state, there are actions that can be taken on each piece (element) of that state. in the abstract, structures can be visited, destroyed, empowered, etc. more concretely, specific items can be retrieved, and specific NPCs can be rescued or killed. the actions get more concrete with the definition of the elements they apply to. abstraction can also be used as a heuristic for influence. If there is some idea in the abstract, say a city, then an individual is unlikely to be able to orchestrate its downfall, for example. even if that individual's disposition toward the city is exceedingly negative, they should not give a quest to destroy the city, since they have such little influence over it. however, they should be able to give a quest to, for example, assassinate the mayor of that city, as this is an element on the same level of abstraction. an action is defined as a set of preconditions and a set of postconditions. then, search can happen backwards from desired postconditions until preconditions match fhe current world state
+
+  the leap from "negative disposition toward a city" to "assassination of that city's mayor" is not trivial. it requires an understanding of complex relationship dynamics between several elements. this effect can be achieved in two ways (likely both in tandem)
+  1. consider disposition networks. presumably, the mayor's disposition to the city would be highly positive and the elements they tend to interact with would also share that positive disposition. because several elements with the same disposition are so closely clustered, it stands to reason that the center of that cluster has a strong connection to the city.
+  2. the world can be simulated. by making random changes to the world and seeing the resultant state, an individual's change in "happiness" can be determined. for example, someone with a highly positive disposition to wealth gaining a large amount of gold would become "happier". these final states in which the individual is most happy can be considered goals to the quest, and actions taken to get there could be the steps to complete that quest. computation time of the simulation can be reduced by again taking advantage of the various levels of abstraction and the idea of influence. a specific item in a cave 100 miles away shouldnt be a part of a farmer's quest to win the pig competition. (NOTE: the fuzziness provided by these abstractions might mean that an individual's quest doesn't fulfill them in the way they expected. this could be an interesting emergent property and provide more interesting storylines that properly reflect an imperfect world) a similar effect might also be possible with the idea of "relevance". when a simulation step causes a major change in happiness, each action can be analyzedfor how much it contributed to the change. e.g. wolf kills sheep causes a large happiness decrease -> npc knows why it wants the wolves hunted. this is also good for generating dialogue, and for analysis of disposition toward actions (e.g. positive, negative, neutral, conflicted). Happiness could be something as simple as multiplying proximity / interaction frequency with a disposition. how important something is to someone can be baked into the disposition magnitude. should sum of dispositions be normalized?
+
+  in order to properly scale quests with levels, several variables in quest generation can be tweaked including: number of actions, how dangerous / lengthy interactions with hostile elements are, net change in disposition, amount of elements affected, how controversial the change in world state is
+
+  when planning the quest, should the npc include "you" as a part of the world state, or should they act as themself and then replace "me" with "you", providing items as necessary? some hybrid may be interesting, with the npc tagging along and providing special skills
+
+  idea of "freeing tension" as a motivation. e.g. having a positive disposition with two cities that have a negative disposition with each other. -> quest involves reconciliation between those two cities. this raises the question of how dispositions are formed. they cant just be randomly assigned (as come across in the wolves + sheep idea). perhaps convictions are held that might conflict with the truth or with other convictions? perhaps a human city incorrectly assumes a nearby orc population wants to pillage them. perhaps they assume that correctly. if they assume it incorrectly, why is that? perhaps dispositions are assigned and then reasons made up? princess is missing, assume the orcs did it. saving the princess exonerates the orcs, but the orcs are still pissed. so the humans maybe need to present a peace offering. how can all this be represented as states + transitions? perhaps two series of events are found to match a set of postconditions. the first is used as truth, but the second is used for generating dispositions -> another reason to track which dispositions are created by which postconditions
+
+  reddit guy: The way games are, simplifications and what not, I feel what gives a quest value is story. You go down to kill the rats and find a dead body, you confront the person who hired you about it. Then that leads to a more interesting quest. Giving people names and possibly having mention of it elsewhere in the world. That's what I liked about Fallout 4 and Witcher 3. You can't make quests that interesting with gameplay mechanics, there's only so much you can do. You also can't really give them meaning cause of the simplification of a game. A good story though, that gives a quest value. When I came across a Power Suit in a crater, I thought oh sweet one I can wear. Only to find out the core had been overloaded and melted the frame shut. You find a voice recording, some guy sacrificed his life to try and save his comrades. You go on and try to find them. There's a bunch more, probably not the best example but it's things like that. Finding something unique in the world and exploring it or seeing it through. That's not something you can procedurally generate. Not in a way with a lot of repetition.
+
+  sHop inventory random item clustrring. make world change so quest precons satisfiable
+
+  revert past world changes -> find my stolen sword, restore my people to their former glory, etc
+
+  ----
+
+  1. identify which dispositions contribute the most to unhappiness
+  2. generate actions that change the targets of those dispositions
+  3. simulate those actions, and store which ones result in changes that create the largest difference in happiness (toward the positive)
+  4. starting with those actions, work backwards until preconditions are met (creating a tree structure)
+  5. oder the actions in a way that makes sense
